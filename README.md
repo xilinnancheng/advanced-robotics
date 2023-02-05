@@ -1,2 +1,2 @@
 # Advanced robotics
-Lesson link: https://people.eecs.berkeley.edu/~pabbeel/cs287-fa19/
+Course link: https://people.eecs.berkeley.edu/~pabbeel/cs287-fa19/

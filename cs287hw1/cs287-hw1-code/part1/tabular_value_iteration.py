@@ -54,8 +54,8 @@ class ValueIteration(object):
                  temperature=1.,
                  ):
         self.env = env
-        self.transitions = env._transitions
-        self.rewards = env._rewards
+        self.transitions = env.transitions
+        self.rewards = env.rewards
         self.value_fun = value_fun
         self.policy = policy
         self.discount = env.discount
@@ -137,7 +137,7 @@ class ValueIteration(object):
 
         """ INSERT YOUR CODE HERE"""
         # transitions matrix: [size * size + 1, action_size, size * size + 1]
-        # value_func's dimension: [size * size + 1, 1]
+        # value_func's dimension: [1, size * size + 1]
         # rewards' dimension: [size * size + 1, action_size, size * size + 1]
         if self.policy_type == 'deterministic':
             # multiply means multiply element-wise
@@ -180,7 +180,6 @@ class ValueIteration(object):
             pi_unnormalized = np.exp(
                 1.0/self.temperature * (q - q.max(axis=1, keepdims=True))) + self.eps
             pi = pi_unnormalized / pi_unnormalized.sum(axis=1, keepdims=True)
-            print(q, pi)
             """ Your code ends here"""
         else:
             raise NotImplementedError

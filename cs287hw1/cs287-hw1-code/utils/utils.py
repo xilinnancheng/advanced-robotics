@@ -491,13 +491,11 @@ class DiscretizeWrapper(object):
             self._act_base_transf = np.cumprod(
                 np.concatenate([[1], self._act_bins_per_dim[:-1]]))
             self._disc_act = False
-
         # Creation of reward and transition matrix
         self.rewards = SparseArray(
             self.obs_n + 1, self.act_n, self.mode, self.obs_dims)
         self.transitions = SparseArray(
             self.obs_n + 1, self.act_n, self.mode, self.obs_dims)
-
         if hasattr(self, 'add_transition') or not getattr(env, 'vectorized', False):
             for id_a in range(self.act_n):
                 for id_s in range(self.obs_n):
@@ -512,9 +510,10 @@ class DiscretizeWrapper(object):
                                          id_acts[i * max_points:(i+1) * max_points])
             if isinstance(env, VectorizeMujocoEnv):
                 env.vec_close()
-
         # Transitions for done
         self.add_done_transitions()
+        self._rewards = self.rewards._values
+        self._transitions = self.transitions._values
 
     def __getattr__(self, attr):
         """

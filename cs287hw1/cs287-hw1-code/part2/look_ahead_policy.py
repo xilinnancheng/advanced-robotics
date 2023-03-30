@@ -21,6 +21,7 @@ class LookAheadPolicy(object):
                 environment for a batch of actions. Returns the next observations, rewards, dones signals, env infos
                 (last not used).
     """
+
     def __init__(self,
                  env,
                  value_fun,
@@ -39,10 +40,14 @@ class LookAheadPolicy(object):
         :return: best_action (int)
            """
         assert isinstance(self.env.action_space, spaces.Discrete)
-        act_dim = self.env.action_space.n
         """ INSERT YOUR CODE HERE"""
-        raise NotImplementedError
-        return best_action
+        act_dim = self.env.action_space.n
+        action_array = []
+        for i in range(self.horizon):
+            action_array.append([x for x in range(act_dim)])
+        action_sequences = np.array(np.meshgrid(
+            *action_array)).T.reshape(-1, self.horizon).T
+        return action_sequences[0, np.argmax(self.get_returns(state, action_sequences))]
 
     def get_returns(self, state, actions):
         """
@@ -53,7 +58,17 @@ class LookAheadPolicy(object):
         """
         assert self.env.vectorized
         """ INSERT YOUR CODE HERE"""
-        raise NotImplementedError
+        num_action_sequence = actions.shape[1]
+        returns = np.zeros(num_action_sequence)
+        self.env.vec_set_state(np.tile(state, (num_action_sequence)))
+        for i in range(self.horizon):
+            next_state, rewards, done, env_infos = self.env.vec_step(
+                actions[i])
+            self.env.vec_set_state(next_state)
+            returns += self.discount ** i * rewards
+
+        returns += self.discount ** self.horizon * \
+            self._value_fun.get_values(next_state)
         return returns
 
     def update(self, actions):

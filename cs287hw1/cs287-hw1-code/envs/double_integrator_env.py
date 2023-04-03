@@ -10,6 +10,7 @@ class DoubleIntegratorEnv(Env):
     """
     state: [pos, vel]
     """
+
     def __init__(self, discount=0.99):
         self._state = np.zeros((2,))
         self.dt = 0.05
@@ -17,13 +18,18 @@ class DoubleIntegratorEnv(Env):
         self._fig = None
         self.discount = discount
         self.vectorized = True
-        self.action_space = spaces.Box(low=np.array((-3,)), high=np.array((3,)), dtype=np.float64)
-        self.observation_space = spaces.Box(low=np.array((-4, -4)), high=np.array((4, 4)), dtype=np.float64)
+        self.action_space = spaces.Box(low=np.array(
+            (-3,)), high=np.array((3,)), dtype=np.float64)
+        self.observation_space = spaces.Box(low=np.array(
+            (-4, -4)), high=np.array((4, 4)), dtype=np.float64)
 
     def step(self, action):
-        next_state = self._state + np.array([self._state[1], action[0]]) * self.dt
-        reward = -0.5 * (self._state[0] ** 2 + self._state[1] ** 2 + action ** 2)
-        done = (next_state < self.observation_space.low).any() or (next_state > self.observation_space.high).any()
+        next_state = self._state + \
+            np.array([self._state[1], action[0]]) * self.dt
+        reward = -0.5 * (self._state[0] ** 2 +
+                         self._state[1] ** 2 + action ** 2)
+        done = (next_state < self.observation_space.low).any() or (
+            next_state > self.observation_space.high).any()
         env_info = dict()
         self._state = next_state
         if done:
@@ -40,8 +46,10 @@ class DoubleIntegratorEnv(Env):
         self._state = state
 
     def vec_step(self, actions):
-        next_states = self._states + np.stack([self._states[:, 1], actions[:, 0]], axis=-1) * self.dt
-        rewards = -0.5 * (self._states[:, 0] ** 2 + self._states[:, 1] ** 2 + actions[:, 0] ** 2)
+        next_states = self._states + \
+            np.stack([self._states[:, 1], actions[:, 0]], axis=-1) * self.dt
+        rewards = -0.5 * (self._states[:, 0] ** 2 +
+                          self._states[:, 1] ** 2 + actions[:, 0] ** 2)
         dones = np.sum([(next_states[:, i] < l) + (next_states[:, i] > h) for i, (l, h)
                         in enumerate(zip(self.observation_space.low, self.observation_space.high))], axis=0).astype(np.bool)
         env_infos = dict()
@@ -80,7 +88,8 @@ class DoubleIntegratorEnv(Env):
         self._canvas.flush_events()
         if mode == 'rgb_array':
             width, height = self._fig.get_size_inches() * self._fig.get_dpi()
-            image = np.fromstring(self._canvas.tostring_rgb(), dtype='uint8').reshape(int(height), int(width), 3)
+            image = np.fromstring(self._canvas.tostring_rgb(), dtype='uint8').reshape(
+                int(height), int(width), 3)
             return image
 
     def close(self):

@@ -23,6 +23,7 @@ class LookAheadPolicy(BaseLookAheadPolicy):
 
     * self.get_returns_state(state): It is the same that you implemented in the previous part
     """
+
     def __init__(self,
                  env,
                  value_fun,
@@ -62,11 +63,34 @@ class LookAheadPolicy(BaseLookAheadPolicy):
         num_acts = self.num_acts
         """ INSERT YOUR CODE HERE"""
         if isinstance(self.env.action_space, spaces.Discrete):
-            raise NotImplementedError
-        else:
+            action_num = self.env.action_space.n
+            action_set = np.arange(action_num)
+            action_sequences = np.random.choice(
+                action_set, (self.horizon, num_acts))
             for _ in range(self.cem_itrs):
-                raise NotImplementedError
+                returns = self.get_returns(state, action_sequences)
+                top_index = returns.argsort()[::-1][0:self.num_elites]
+                stacked = []
+                for h in range(self.horizon):
+                    stacked.append(np.random.choice(action_sequences[h, top_index],
+                                                    size=(num_acts, )))
+                sequences = np.vstack(stacked)
+            best_action = sequences[0, top_index[0]]
+
+        else:
+            act_dim = self.env.action_space.low.shape[0]
+            action_sequences = np.random.uniform(self.env.action_space.low,
+                                                 self.env.action_space.high,
+                                                 size=(self.horizon, num_acts, act_dim))
+            for _ in range(self.cem_itrs):
+                returns = self.get_returns(state, action_sequences)
+                top_index = returns.argsort()[::-1][0:self.num_elites]
+                mean = action_sequences[:, top_index].mean(1)
+                std = action_sequences[:, top_index].std(1)
+                action_sequences = np.random.normal(
+                    loc=mean, scale=std, size=(self.horizon, num_acts, act_dim))
             """ Your code ends here """
+            best_action = action_sequences[0, top_index[0]]
         return best_action
 
     def get_action_rs(self, state):
@@ -78,9 +102,17 @@ class LookAheadPolicy(BaseLookAheadPolicy):
         num_acts = self.num_acts
         """ INSERT YOUR CODE HERE """
         if isinstance(self.env.action_space, spaces.Discrete):
-            raise NotImplementedError
+            action_num = self.env.action_space.n
+            action_set = np.arange(action_num)
+            action_sequences = np.random.choice(
+                action_set, (self.horizon, num_acts))
         else:
             assert num_acts is not None
-            raise NotImplementedError
+            act_dim = self.env.action_space.low.shape[0]
+            action_sequences = np.random.uniform(self.env.action_space.low,
+                                                 self.env.action_space.high,
+                                                 size=(self.horizon, num_acts, act_dim))
 
+        best_action = action_sequences[0, np.argmax(
+            self.get_returns(state, action_sequences))]
         return best_action

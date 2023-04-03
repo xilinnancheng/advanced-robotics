@@ -60,7 +60,7 @@ class LookAheadPolicy(object):
         """ INSERT YOUR CODE HERE"""
         num_action_sequence = actions.shape[1]
         returns = np.zeros(num_action_sequence)
-        self.env.vec_set_state(np.tile(state, (num_action_sequence)))
+        self.env.vec_set_state(np.tile(state, (num_action_sequence, 1)))
         for i in range(self.horizon):
             next_state, rewards, done, env_infos = self.env.vec_step(
                 actions[i])

@@ -38,6 +38,7 @@ class ContinousStateValueIteration(object):
     * self.num_acts (int): number of actions used to maximize the value function.
     to the target values.
     """
+
     def __init__(self,
                  env,
                  value_fun,
@@ -58,7 +59,8 @@ class ContinousStateValueIteration(object):
         self.log_itr = log_itr
         self.optimizer = AdamOptimizer(lr=learning_rate)
         self.batch_size = batch_size
-        self.num_acts = self.env.action_space.n if isinstance(env.action_space, spaces.Discrete) else num_acts
+        self.num_acts = self.env.action_space.n if isinstance(
+            env.action_space, spaces.Discrete) else num_acts
         self.render_itr = render_itr
         self.render = render
 
@@ -74,9 +76,11 @@ class ContinousStateValueIteration(object):
             log = itr % self.log_itr == 0 or itr == self.max_itr - 1
             render = (itr % self.render_itr == 0) and self.render
             if log:
-                average_return, video = rollout(self.env, self.policy, render=render, iteration=itr)
+                average_return, video = rollout(
+                    self.env, self.policy, render=render, iteration=itr)
                 if render:
-                    contour, fig = plot_contour(self.env, self.value_fun, fig=fig, iteration=itr)
+                    contour, fig = plot_contour(
+                        self.env, self.value_fun, fig=fig, iteration=itr)
                     contours += [contour]
                     videos += video
                 returns.append(average_return)
@@ -107,7 +111,8 @@ class ContinousStateValueIteration(object):
         """
         states, next_states, rewards, dones = self.get_states_and_transitions()
         """ INSERT YOUR CODE HERE"""
-        raise NotImplementedError
+        loss = np.linalg.norm(rewards + self.discount * self.value_fun.get_values(
+            states, params) - self.value_fun.get_values(next_states, params)) ** 2
         return loss
 
     def get_states_and_transitions(self):
@@ -116,11 +121,13 @@ class ContinousStateValueIteration(object):
             if num_states is None:
                 states = np.arange(self.env.observation_space.n)
             else:
-                states = np.random.randint(0, self.env.action_space.n, size=(num_states,))
+                states = np.random.randint(
+                    0, self.env.action_space.n, size=(num_states,))
         else:
             assert num_states is not None
             state_low, state_high = self.env.observation_space.low, self.env.observation_space.high
-            states = np.random.uniform(state_low, state_high, size=(num_states, len(state_low)))
+            states = np.random.uniform(
+                state_low, state_high, size=(num_states, len(state_low)))
 
         if isinstance(self.env.action_space, spaces.Discrete):
             num_acts = self.env.action_space.n
@@ -128,7 +135,8 @@ class ContinousStateValueIteration(object):
         else:
             assert num_acts is not None
             act_low, act_high = self.env.action_space.low, self.env.action_space.high
-            actions = np.random.uniform(act_low, act_high, size=(num_acts, len(act_low)))
+            actions = np.random.uniform(
+                act_low, act_high, size=(num_acts, len(act_low)))
 
         states = np.tile(states.T, num_acts).T
         actions = np.repeat(actions, num_states, axis=0)

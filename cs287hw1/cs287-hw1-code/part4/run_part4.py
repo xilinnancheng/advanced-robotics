@@ -2,7 +2,8 @@ import logger
 import argparse
 import os
 import json
-import numpy as np; np.random.seed(0)
+import numpy as np
+np.random.seed(0)
 
 
 def main(args):
@@ -20,14 +21,15 @@ def main(args):
     for env in envs:
         env_name = env.__class__.__name__
         exp_dir = os.getcwd() + '/data/part5/%s/mode%s_state_discretization%s/' % (env_name,
-                                                                                      args.mode,
-                                                                                      str(args.state_discretization)
-                                                                                      )
+                                                                                   args.mode,
+                                                                                   str(
+                                                                                       args.state_discretization)
+                                                                                   )
         logger.configure(dir=exp_dir, format_strs=['stdout', 'log', 'csv'])
         args_dict = vars(args)
         args_dict['env'] = env_name
-        json.dump(vars(args), open(exp_dir + '/params.json', 'w'), indent=2, sort_keys=True)
-
+        json.dump(vars(args), open(exp_dir + '/params.json', 'w'),
+                  indent=2, sort_keys=True)
         env = Discretize(env,
                          state_discretization=args.state_discretization,
                          mode=args.mode
